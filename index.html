@@ -5,8 +5,320 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>疗愈小屋</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#f7f5f1">
+  <!-- 内联小图标：不然浏览器会额外去要一次 /favicon.ico，跨境线上又是约 1 秒 -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f7f5f1'/%3E%3Crect x='9' y='9' width='14' height='14' fill='%23191814'/%3E%3C/svg%3E">
   <script>document.documentElement.classList.add('js');</script>
+
+  <style>
+    /* ============================================================
+       样式写在这里（而不是单独的 styles.css），是为了让手机打开时
+       只发一个请求：HTML 到手，页面就能直接画出来。
+       在跨境网络上，多一个请求就多等约 1 秒。
+       ============================================================ */
+
+    :root{
+      --paper:  #f7f5f1;
+      --paper-2:#efece5;
+      --ink:    #191814;
+      --muted:  #857e73;
+      --faint:  #b3aa9d;
+      --line:   #e2ddd4;
+      --ph:     #eae5dc;
+
+      --serif: "Songti SC","Source Han Serif SC","Noto Serif SC","Times New Roman",Georgia,serif;
+      --sans:  -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+
+      --ease: cubic-bezier(.19,.7,.22,1);
+      --head: 66px;
+    }
+
+    *,*::before,*::after{box-sizing:border-box}
+
+    html{-webkit-text-size-adjust:100%}
+
+    body{
+      margin:0;
+      background:var(--paper);
+      color:var(--ink);
+      font-family:var(--sans);
+      font-size:15px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    ::selection{background:var(--ink);color:var(--paper)}
+
+    img{max-width:100%;border:0}
+    button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+    a{color:inherit;text-decoration:none}
+    h1,p{margin:0}
+
+    .grain{
+      position:fixed;inset:0;z-index:9;pointer-events:none;
+      opacity:.045;mix-blend-mode:multiply;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+    }
+
+    .wrap{
+      width:100%;
+      max-width:1440px;
+      margin:0 auto;
+      padding-inline:clamp(20px,4vw,56px);
+    }
+
+    /* ---------------- header ---------------- */
+
+    .site-head{
+      position:sticky;top:0;z-index:20;
+      background:var(--paper);
+      border-bottom:1px solid var(--line);
+    }
+    .head-inner{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:20px;height:var(--head);
+    }
+    .mark{
+      font-family:var(--serif);
+      font-size:19px;
+      letter-spacing:.4em;
+      line-height:1;
+    }
+    .back{
+      display:none;
+      font-size:10.5px;
+      letter-spacing:.16em;
+      color:var(--muted);
+      transition:color .3s ease,transform .4s var(--ease);
+    }
+    @media (hover:hover){
+      .back:hover{color:var(--ink);transform:translateX(-3px)}
+    }
+    body.is-gallery .back{display:block}
+
+    /* ---------------- views ---------------- */
+
+    .view{display:none}
+    .view.is-on{display:block}
+
+    /* ---------------- 首屏：分类 ---------------- */
+
+    .index{
+      width:100%;
+      max-width:880px;
+      min-height:calc(100vh - var(--head));
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      padding-block:52px 76px;
+    }
+
+    .cat{
+      position:relative;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:24px;
+      padding-block:clamp(24px,3.8vh,44px);
+      border-top:1px solid var(--line);
+    }
+    .cat:last-child{border-bottom:1px solid var(--line)}
+
+    .cat-name{
+      font-family:var(--serif);
+      font-weight:400;
+      font-size:clamp(28px,4vw,50px);
+      line-height:1.1;
+      letter-spacing:.08em;
+      transition:transform .55s var(--ease),opacity .5s ease;
+    }
+    @media (hover:hover){
+      .cat:hover .cat-name{transform:translateX(clamp(8px,1.4vw,18px))}
+    }
+    .cat:focus-visible .cat-name{transform:translateX(clamp(8px,1.4vw,18px))}
+
+    .cat-go{
+      font-family:var(--serif);
+      font-size:19px;
+      color:var(--ink);
+      opacity:.18;
+      transform:translateX(-4px);
+      transition:opacity .45s ease,transform .55s var(--ease);
+    }
+    @media (hover:hover){
+      .cat:hover .cat-go{opacity:.55;transform:translateX(4px)}
+    }
+    .cat:focus-visible .cat-go{opacity:.55;transform:translateX(4px)}
+
+    /* 首屏入场 */
+    .js .cat{animation:catIn .9s var(--ease) both}
+    .js .cat:nth-child(1){animation-delay:.05s}
+    .js .cat:nth-child(2){animation-delay:.12s}
+    .js .cat:nth-child(3){animation-delay:.19s}
+    .js .cat:nth-child(4){animation-delay:.26s}
+    .js .cat:nth-child(5){animation-delay:.33s}
+    .js .cat:nth-child(6){animation-delay:.4s}
+    @keyframes catIn{
+      from{opacity:0;transform:translateY(14px)}
+      to{opacity:1;transform:none}
+    }
+
+    /* ---------------- 图墙 ---------------- */
+
+    .cat-title{
+      font-family:var(--serif);
+      font-weight:400;
+      font-size:clamp(17px,1.7vw,21px);
+      letter-spacing:.12em;
+      padding:clamp(30px,4.4vw,56px) 0 clamp(16px,1.8vw,22px);
+      border-bottom:1px solid var(--line);
+      margin-bottom:clamp(16px,1.8vw,24px);
+      animation:catIn .7s var(--ease) both;
+    }
+
+    .gallery{
+      display:flex;
+      align-items:flex-start;
+      gap:clamp(10px,1.2vw,16px);
+    }
+    .gcol{
+      flex:1 1 0;
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:clamp(10px,1.2vw,16px);
+    }
+
+    .shot{
+      display:block;
+      width:100%;
+      /* --tint 由脚本按每张图的主色调注入：图还在路上时先铺这层颜色，
+         不会出现一块死灰占位 */
+      background:var(--tint, var(--ph));
+      overflow:hidden;
+      cursor:zoom-in;
+      animation:shotIn .8s var(--ease) both;
+    }
+    @keyframes shotIn{
+      from{opacity:0;transform:translateY(12px)}
+      to{opacity:1;transform:none}
+    }
+
+    .shot picture{display:block}
+
+    .shot img{
+      display:block;
+      width:100%;height:auto;
+      opacity:0;
+      transition:transform 1.2s var(--ease),opacity .6s ease;
+    }
+    .shot img.loaded{opacity:1}
+    @media (hover:hover){
+      .shot:hover img{transform:scale(1.025)}
+    }
+
+    /* ---------------- lightbox ---------------- */
+
+    .lb{
+      position:fixed;inset:0;z-index:100;
+      display:none;
+      background:rgba(247,245,241,.972);
+      -webkit-backdrop-filter:blur(14px);
+      backdrop-filter:blur(14px);
+    }
+    .lb.open{display:block}
+    body.lb-open{overflow:hidden}
+
+    .lb-stage{
+      position:absolute;
+      inset:clamp(56px,7vh,84px) clamp(56px,7vw,110px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:0;
+    }
+    .lb-stage img{
+      max-width:100%;
+      max-height:calc(100vh - 2 * clamp(56px,7vh,84px));
+      object-fit:contain;
+      border:1px solid rgba(25,24,20,.07);
+      box-shadow:0 30px 80px -44px rgba(46,38,22,.5);
+      background:var(--ph);
+      animation:lbIn .45s ease both;
+    }
+    @keyframes lbIn{from{opacity:0}to{opacity:1}}
+
+    .lb-x{
+      position:absolute;top:22px;right:clamp(18px,4vw,56px);
+      font-size:10px;letter-spacing:.2em;color:var(--muted);
+      transition:color .3s ease;
+    }
+    .lb-x em{
+      font-style:normal;font-size:8.5px;
+      color:var(--faint);
+      border:1px solid var(--line);
+      padding:2px 5px;margin-left:7px;
+    }
+    @media (hover:hover){
+      .lb-x:hover{color:var(--ink)}
+    }
+
+    .lb-no{
+      position:absolute;top:24px;left:clamp(18px,4vw,56px);
+      font-size:10px;letter-spacing:.2em;
+      color:var(--faint);
+      font-variant-numeric:tabular-nums;
+    }
+
+    .lb-arrow{
+      position:absolute;top:50%;transform:translateY(-50%);
+      width:clamp(40px,4vw,56px);height:clamp(40px,4vw,56px);
+      display:grid;place-items:center;
+      opacity:.3;
+      transition:opacity .3s ease;
+    }
+    .lb-arrow svg{
+      width:22px;height:22px;
+      fill:none;stroke:var(--ink);stroke-width:1.1;stroke-linecap:square;
+    }
+    @media (hover:hover){
+      .lb-arrow:hover{opacity:.95}
+    }
+    .lb-arrow:disabled{opacity:.12;cursor:default}
+    .lb-prev{left:clamp(2px,1vw,18px)}
+    .lb-next{right:clamp(2px,1vw,18px)}
+
+    #viewGallery{padding-bottom:clamp(44px,7vw,96px)}
+
+    /* ---------------- responsive ---------------- */
+
+    @media (max-width:900px){
+      .mark{font-size:17px;letter-spacing:.32em}
+    }
+
+    @media (max-width:620px){
+      :root{--head:56px}
+      .index{padding-block:32px 64px}
+      .cat{padding-block:26px}
+      .cat-go{display:none}
+      /* 全屏噪点层靠 mix-blend-mode 合成，中低端手机滚动时会掉帧，
+         小屏直接关掉，视觉上几乎看不出差别 */
+      .grain{display:none}
+      .lb-stage{inset:64px 10px 76px}
+      .lb-stage img{max-height:calc(100vh - 160px)}
+      .lb-arrow{
+        top:auto;bottom:10px;transform:none;
+        width:44px;height:44px;
+      }
+      .lb-prev{left:calc(50% - 52px)}
+      .lb-next{left:calc(50% + 8px)}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      *{transition:none!important;animation:none!important}
+      .shot img{opacity:1}
+      .shot:hover img{transform:none}
+    }
+  </style>
 </head>
 
 <body class="is-home">
@@ -51,7 +363,452 @@
     <span class="lb-no" id="lbNo"></span>
   </div>
 
-  <script src="app.js"></script>
+  <script>
+    /* ============================================================
+       疗愈小屋 · 图集
+       换图 / 加分类：只改下面的 CATS 和 PHOTOS 两个数组。
+       src 指向 images/ 里的本地文件，w / h 必须是图片【真实】像素宽高
+       —— 填错了占位比例就错，图加载完页面会跳一下。
+       加完图片跑一次：python tools/optimize-images.py
+       它会生成 images/w/ 下的多尺寸 WebP 和 TINT 主色调表。
+       ============================================================ */
+
+    const CATS = [
+      { id: 'R18', name: 'R18' },
+      { id: 'foot', name: '脚' },
+      { id: 'big', name: '巨入' },
+      { id: 'small', name: '贫入' },
+      { id: 'beauty', name: '唯美' }
+    ];
+
+    const PHOTOS = [
+      { src: 'images/01.jpg', w: 2434, h: 1303, cat: 'R18' },
+      { src: 'images/02.jpg', w: 1003, h: 1416, cat: 'R18' },
+      { src: 'images/03.jpg', w: 1500, h: 2000, cat: 'R18' },
+      { src: 'images/04.jpg', w: 1479, h: 2560, cat: 'R18' },
+      { src: 'images/05.jpg', w: 894, h: 1340, cat: 'foot' },
+      { src: 'images/06.jpg', w: 376, h: 685, cat: 'foot' },
+      { src: 'images/07.jpg', w: 754, h: 1200, cat: 'foot' },
+      { src: 'images/08.jpg', w: 1964, h: 2560, cat: 'big' },
+      { src: 'images/09.jpg', w: 1330, h: 1330, cat: 'big' },
+      { src: 'images/10.jpg', w: 1200, h: 1779, cat: 'big' },
+      { src: 'images/11.jpg', w: 943, h: 1528, cat: 'big' },
+      { src: 'images/12.jpg', w: 743, h: 1051, cat: 'big' },
+      { src: 'images/13.jpg', w: 1637, h: 2560, cat: 'small' },
+      { src: 'images/14.jpg', w: 1756, h: 2479, cat: 'small' },
+      { src: 'images/15.jpg', w: 959, h: 1354, cat: 'beauty' },
+      { src: 'images/16.jpg', w: 1165, h: 1631, cat: 'beauty' },
+      { src: 'images/17.jpg', w: 892, h: 1220, cat: 'beauty' },
+      { src: 'images/18.jpg', w: 1811, h: 2560, cat: 'beauty' },
+      { src: 'images/19.jpg', w: 1082, h: 1288, cat: 'beauty' },
+      { src: 'images/20.jpg', w: 799, h: 882, cat: 'beauty' }
+    ];
+
+    /* 每张图的主色调，由 tools/optimize-images.py 生成后贴到这里。
+       作用：图还在路上时先铺这层颜色，不是一块死灰。 */
+    const TINT = {
+      '01': '#b79299',
+      '02': '#bcaaae',
+      '03': '#aa969c',
+      '04': '#e0d4da',
+      '05': '#a79bad',
+      '06': '#878087',
+      '07': '#cac3c5',
+      '08': '#f0bdbc',
+      '09': '#c3aeb2',
+      '10': '#ded2d9',
+      '11': '#e6b9bc',
+      '12': '#9d8071',
+      '13': '#dfc8c6',
+      '14': '#d5c9c6',
+      '15': '#88969d',
+      '16': '#4f6168',
+      '17': '#b09aba',
+      '18': '#d7d6df',
+      '19': '#d9ced4',
+      '20': '#e4d6dc'
+    };
+
+    /* ---------------- 多尺寸 WebP ----------------
+       档位必须和 tools/optimize-images.py 里的 LADDER 一致：
+       只有「档位 <= 原图宽度」的那些文件才是真实存在的。            */
+
+    const LADDER = [480, 640, 800, 1200, 1600];
+
+    const widthsFor = p => LADDER.filter(w => w <= p.w);
+
+    const stemOf = p => p.src.split('/').pop().replace(/\.[^.]+$/, '');
+
+    const webpPath = (p, w) => `images/w/${stemOf(p)}-${w}.webp`;
+
+    const srcsetOf = p => widthsFor(p).map(w => `${webpPath(p, w)} ${w}w`).join(', ');
+
+    /* 图墙里一格大概占多宽。和上面的断点、留白对齐：
+       <=620 一列 / <=1080 两列 / 其余三列                              */
+    const SIZES_GRID =
+      '(max-width:620px) calc(100vw - 40px), ' +
+      '(max-width:1080px) calc((100vw - 76px) / 2), ' +
+      'calc((100vw - 132px) / 3)';
+
+    const SIZES_LB = '(max-width:620px) calc(100vw - 20px), calc(100vw - 220px)';
+
+    /* ---------------- 元素 ---------------- */
+
+    const indexEl = document.getElementById('index');
+    const galleryEl = document.getElementById('gallery');
+    const titleEl = document.getElementById('catTitle');
+    const viewHome = document.getElementById('viewHome');
+    const viewGalb = document.getElementById('viewGallery');
+
+    const lb = document.getElementById('lb');
+    const lbImg = document.getElementById('lbImg');
+    const lbNo = document.getElementById('lbNo');
+    const lbPrev = document.getElementById('lbPrev');
+    const lbNext = document.getElementById('lbNext');
+    const lbClose = document.getElementById('lbClose');
+
+    let current = [];   // 当前分类的照片
+    let cursor = 0;
+
+    /* ---------------- 首屏 ---------------- */
+
+    function renderIndex() {
+      indexEl.innerHTML = CATS.map(c => `
+    <a class="cat" href="#/${c.id}">
+      <span class="cat-name">${c.name}</span>
+      <span class="cat-go" aria-hidden="true">→</span>
+    </a>`).join('');
+    }
+
+    /* ---------------- 图墙 ---------------- */
+
+    const colCount = () => {
+      const w = window.innerWidth;
+      return w <= 620 ? 1 : w <= 1080 ? 2 : 3;
+    };
+
+    /* 把图片分到各列：多试几遍「放进最矮的列」，取底部最齐的那一版。
+       随机种子固定 —— 每次打开排版都一样。                        */
+
+    function mulberry32(a) {
+      return function () {
+        a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    function distribute(items, n) {
+      if (n === 1) return [items];
+
+      const rnd = mulberry32(20261108);
+      let best = null;
+      let bestScore = Infinity;
+
+      for (let t = 0; t < 120; t++) {
+        const arr = items.slice();
+        if (t) {
+          for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(rnd() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+          }
+        }
+        const cols = Array.from({ length: n }, () => []);
+        const h = new Array(n).fill(0);
+        arr.forEach(it => {
+          const k = h.indexOf(Math.min(...h));
+          cols[k].push(it);
+          h[k] += it.r;
+        });
+        const score = Math.max(...h) - Math.min(...h);
+        if (score < bestScore - 1e-6) { bestScore = score; best = cols; }
+      }
+
+      // 每列内部按原顺序排，读起来更顺
+      best.forEach(c => c.sort((a, b) => a.i - b.i));
+      return best;
+    }
+
+    function masonry() {
+      const n = colCount();
+      const items = [...galleryEl.querySelectorAll('.shot')].map(el => {
+        const i = Number(el.dataset.i);
+        const p = current[i];
+        return { el, i, r: p.h / p.w };
+      });
+
+      const cols = distribute(items, n).map(group => {
+        const d = document.createElement('div');
+        d.className = 'gcol';
+        group.forEach(it => d.appendChild(it.el));
+        return d;
+      });
+
+      galleryEl.replaceChildren(...cols);
+    }
+
+    /* ---------------- 按需加载 ----------------
+       手机上一次只下载「快滚到的那一张」，而不是把整个分类全拉下来。
+       浏览器自带的 loading="lazy" 预载距离在 1000px 以上，单列布局里
+       几乎等于全部立刻下载，所以这里自己用 IntersectionObserver 控。 */
+
+    const io = 'IntersectionObserver' in window
+      ? new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          io.unobserve(e.target);
+          enqueue(e.target);
+        });
+      }, { rootMargin: '300px 0px' })
+      : null;
+
+    function fadeIn(img, onDone) {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        img.classList.add('loaded');
+        if (onDone) onDone();
+      };
+      const timer = setTimeout(finish, 12000);
+      if (img.complete && img.naturalWidth) return finish();
+      img.addEventListener('load', finish, { once: true });
+      img.addEventListener('error', finish, { once: true });
+    }
+
+    /* 排队下载，一次只下一张。
+       弱网下同时下 N 张会平分带宽，结果是谁都迟迟不出来；
+       串行的话屏幕上这一张能最快到，剩下的它到了再下。 */
+
+    const queue = [];
+    let busy = false;
+    let gate = 0;      // >0 表示首图正在直接加载，先别开新请求抢带宽
+
+    function enqueue(shot) {
+      if (shot.dataset.queued) return;
+      shot.dataset.queued = '1';
+      queue.push(shot);
+      pump();
+    }
+
+    function pump() {
+      if (busy || gate) return;
+      const shot = queue.shift();
+      if (!shot) return;
+      busy = true;
+      loadShot(shot, () => { busy = false; pump(); });
+    }
+
+    function loadShot(shot, done) {
+      const img = shot.querySelector('img');
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        done();
+      };
+      // 某一张卡住也不要拖住后面所有的
+      const timer = setTimeout(finish, 12000);
+
+      if (!img || img.hasAttribute('src')) return finish();
+
+      img.addEventListener('load', () => { img.classList.add('loaded'); finish(); }, { once: true });
+      img.addEventListener('error', finish, { once: true });
+
+      shot.querySelectorAll('source[data-srcset]').forEach(s => {
+        s.srcset = s.dataset.srcset;
+        if (s.dataset.sizes) s.sizes = s.dataset.sizes;
+      });
+      img.src = img.dataset.src;
+      img.removeAttribute('data-src');
+    }
+
+    /* 手机上图墙固定用这一档：屏幕小，再高清也看不出，
+       但字节数能省掉近一半。觉得糊就把 640 改成 800。 */
+    const MOBILE_RUNG = 640;
+
+    function sourcesOf(p, first) {
+      const out = [];
+      const widths = widthsFor(p);
+
+      if (widths.includes(MOBILE_RUNG)) {
+        const m = webpPath(p, MOBILE_RUNG);
+        out.push(`<source media="(max-width:620px)" type="image/webp" ${first ? `srcset="${m}"` : `data-srcset="${m}"`}>`);
+      }
+
+      const set = srcsetOf(p);
+      if (set) {
+        out.push(`<source type="image/webp" ${first
+          ? `srcset="${set}" sizes="${SIZES_GRID}"`
+          : `data-srcset="${set}" data-sizes="${SIZES_GRID}"`}>`);
+      }
+      return out.join('');
+    }
+
+    function shotHTML(p, i, total) {
+      const first = i === 0;
+      const tint = TINT[stemOf(p)] || '#eae5dc';
+
+      return `
+    <button class="shot" type="button" data-i="${i}"
+            style="--tint:${tint};animation-delay:${Math.min(i * 35, 420)}ms"
+            aria-label="第 ${i + 1} 张，共 ${total} 张">
+      <picture>
+        ${sourcesOf(p, first)}
+        <img ${first ? `src="${p.src}"` : `data-src="${p.src}"`}
+             width="${p.w}" height="${p.h}" alt=""
+             decoding="async"${first ? ' fetchpriority="high"' : ''}>
+      </picture>
+    </button>`;
+    }
+
+    function openCat(id) {
+      const cat = CATS.find(c => c.id === id);
+      if (!cat) return goHome();
+
+      closeLB();
+      current = PHOTOS.filter(p => p.cat === id);
+      titleEl.textContent = cat.name;
+
+      galleryEl.innerHTML = current.map((p, i) => shotHTML(p, i, current.length)).join('');
+
+      masonry();
+
+      galleryEl.querySelectorAll('.shot').forEach(shot => {
+        const img = shot.querySelector('img');
+        if (img.hasAttribute('src')) { gate = 1; fadeIn(img, () => { gate = 0; pump(); }); }
+        else if (io) io.observe(shot);
+        else enqueue(shot);
+      });
+
+      document.body.classList.remove('is-home');
+      document.body.classList.add('is-gallery');
+      viewHome.classList.remove('is-on');
+      viewGalb.classList.add('is-on');
+      window.scrollTo(0, 0);
+    }
+
+    function goHome() {
+      closeLB();
+      renderIndex();
+      document.body.classList.remove('is-gallery');
+      document.body.classList.add('is-home');
+      viewGalb.classList.remove('is-on');
+      viewHome.classList.add('is-on');
+      window.scrollTo(0, 0);
+    }
+
+    /* ---------------- 灯箱 ---------------- */
+
+    /* 预加载左右各一张，滑动时不用等 */
+    const warmed = new Set();
+
+    function warmNeighbors() {
+      if (current.length < 2) return;
+      [1, -1].forEach(d => {
+        const p = current[(cursor + d + current.length) % current.length];
+        if (warmed.has(p.src)) return;
+        warmed.add(p.src);
+        const im = new Image();
+        const set = srcsetOf(p);
+        if (set) { im.srcset = set; im.sizes = SIZES_LB; }
+        im.src = p.src;
+      });
+    }
+
+    function paint() {
+      const p = current[cursor];
+      const set = srcsetOf(p);
+      if (set) {
+        lbImg.srcset = set;
+        lbImg.sizes = SIZES_LB;
+      } else {
+        lbImg.removeAttribute('srcset');
+      }
+      lbImg.src = p.src;
+      lbNo.textContent = `${String(cursor + 1).padStart(2, '0')} / ${String(current.length).padStart(2, '0')}`;
+      warmNeighbors();
+    }
+
+    function openLB(i) {
+      if (!current.length) return;
+      cursor = i;
+      paint();
+      lb.classList.add('open');
+      document.body.classList.add('lb-open');
+      lbClose.focus({ preventScroll: true });
+    }
+
+    function closeLB() {
+      if (!lb.classList.contains('open')) return;
+      lb.classList.remove('open');
+      document.body.classList.remove('lb-open');
+      lbImg.removeAttribute('src');
+      lbImg.removeAttribute('srcset');
+      lbImg.removeAttribute('sizes');
+    }
+
+    function step(dir) {
+      if (!current.length) return;
+      cursor = (cursor + dir + current.length) % current.length;
+      paint();
+    }
+
+    galleryEl.addEventListener('click', e => {
+      const shot = e.target.closest('.shot');
+      if (shot) openLB(Number(shot.dataset.i));
+    });
+
+    lbClose.addEventListener('click', closeLB);
+    lbPrev.addEventListener('click', () => step(-1));
+    lbNext.addEventListener('click', () => step(1));
+
+    lb.addEventListener('click', e => {
+      if (e.target === lb || e.target.classList.contains('lb-stage')) closeLB();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (lb.classList.contains('open')) {
+        if (e.key === 'Escape') closeLB();
+        if (e.key === 'ArrowLeft') step(-1);
+        if (e.key === 'ArrowRight') step(1);
+        return;
+      }
+      if (e.key === 'Escape' && location.hash) location.hash = '#/';
+    });
+
+    /* 手机滑动 */
+    let touchX = null;
+    lb.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', e => {
+      if (touchX === null) return;
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 50) step(dx > 0 ? -1 : 1);
+      touchX = null;
+    }, { passive: true });
+
+    /* ---------------- 路由 ---------------- */
+
+    function route() {
+      const id = (location.hash || '').replace(/^#\/?/, '');
+      if (id) openCat(id);
+      else goHome();
+    }
+
+    window.addEventListener('hashchange', route);
+
+    let rzTimer = null;
+    window.addEventListener('resize', () => {
+      if (!document.body.classList.contains('is-gallery')) return;
+      clearTimeout(rzTimer);
+      rzTimer = setTimeout(masonry, 140);
+    });
+
+    route();
+  </script>
 </body>
 
 </html>

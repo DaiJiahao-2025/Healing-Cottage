@@ -2,26 +2,23 @@
 # Netlify 缓存策略
 # _headers 放在发布目录根下，Git 部署和拖拽部署都会生效。
 #
-# 为什么要这个文件：Netlify 对静态文件的默认响应头是
+# 为什么需要它：Netlify 对静态文件的默认响应头是
 #   cache-control: public, max-age=0, must-revalidate
-# 也就是"每次访问都要回源校验一遍"。一页 6 张图就是 6 次往返，
-# 手机弱网下这部分开销非常明显。
+# 也就是"每次访问都要回源校验一遍"。每个请求在跨境线路上
+# 光等第一个字节就要 1 秒左右，所以能省一次是一次。
+#
+# 现在样式和脚本都内联在 index.html 里了，只有 HTML 和图片两类。
 # ============================================================
 
 # 图片：一个月内直接用本地缓存，过期后先在后台校验、先把旧图给你看
 /images/*
   Cache-Control: public, max-age=2592000, stale-while-revalidate=604800
 
-# 样式 / 脚本：10 分钟内复用缓存，后台静默更新
-/*.css
-  Cache-Control: public, max-age=600, stale-while-revalidate=86400
-
-/*.js
-  Cache-Control: public, max-age=600, stale-while-revalidate=86400
-
-# HTML：每次都回源校验，保证换图后立刻生效
+# HTML：过期立即算旧，但 10 分钟内先拿旧的给你看、同时在后台更新。
+# 好处是第二次打开几乎是 0 等待；改了图最多 10 分钟内会被换掉。
+# 想让它更"实时"就把 600 调小（比如 60）。
 /
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: public, max-age=0, stale-while-revalidate=600
 
 /*.html
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: public, max-age=0, stale-while-revalidate=600

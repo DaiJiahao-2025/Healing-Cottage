@@ -17,8 +17,10 @@ from pathlib import Path
 
 from PIL import Image, ImageOps
 
-LADDER = (480, 800, 1200, 1600)  # 宽度档位，必须和 app.js 的 LADDER 一样
-QUALITY = 76                     # WebP 质量：76 对照片够用，肉眼几乎无损
+LADDER = (480, 640, 800, 1200, 1600)  # 宽度档位，必须和 index.html 的 LADDER 一样
+# 每档质量分开给：小图手机上根本看不出差别，压狠一点；
+# 大图主要给灯箱放大用，留得好一些。
+QUALITY = {480: 60, 640: 62, 800: 66, 1200: 70, 1600: 72}
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = ROOT / "images"
@@ -38,6 +40,7 @@ def main() -> int:
         return 1
 
     total_in = total_out = 0
+    tints = []
     print(f"{'file':14} {'original':>12} {'variants':>10} {'new':>10} {'saved':>7}")
     print("-" * 58)
 
@@ -47,13 +50,17 @@ def main() -> int:
             img = img.convert("RGB")
             w, h = img.size
 
+            # 主色调：缩到 1×1 求平均，用作图片没加载出来时的占位底色
+            r, g, b = img.resize((1, 1), Image.LANCZOS).getpixel((0, 0))[:3]
+            tints.append((path.stem, f"#{r:02x}{g:02x}{b:02x}"))
+
             made, size_out = [], 0
             targets = [t for t in LADDER if t <= w]
             for target in targets:
                 nh = max(1, round(h * target / w))
                 out = OUT_DIR / f"{path.stem}-{target}.webp"
                 img.resize((target, nh), Image.LANCZOS).save(
-                    out, "WEBP", quality=QUALITY, method=6
+                    out, "WEBP", quality=QUALITY[target], method=6
                 )
                 made.append(target)
                 size_out += out.stat().st_size
@@ -74,6 +81,13 @@ def main() -> int:
         f"{100 * (1 - total_out / total_in) if total_in else 0:6.0f}%"
     )
     print(f"\n{len(files)} 张原图 -> {len(list(OUT_DIR.glob('*.webp')))} 个 WebP")
+
+    # 主色调表：贴到 index.html 的 TINT 里
+    print("\n/* ---------- TINT：贴到 index.html ---------- */")
+    print("const TINT = {")
+    for stem, hexcode in tints:
+        print(f"  '{stem}': '{hexcode}',")
+    print("};")
     return 0
 
 
