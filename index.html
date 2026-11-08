@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>疗愈小屋</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+
+<body class="is-home">
+
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="site-head">
+    <div class="wrap head-inner">
+      <a class="mark" href="#/">疗愈小屋</a>
+      <a class="back" id="back" href="#/">← 全部分类</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="view is-on" id="viewHome">
+      <div class="wrap">
+        <div class="index" id="index"></div>
+      </div>
+    </section>
+
+    <section class="view" id="viewGallery">
+      <div class="wrap">
+        <h1 class="cat-title" id="catTitle">疗愈小屋</h1>
+        <div class="gallery" id="gallery"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="查看图片">
+    <button class="lb-x" id="lbClose">关闭<em>Esc</em></button>
+    <div class="lb-stage"><img id="lbImg" alt=""></div>
+    <button class="lb-arrow lb-prev" id="lbPrev" aria-label="上一张">
+      <svg viewBox="0 0 24 24">
+        <path d="M15 4 7 12l8 8" />
+      </svg>
+    </button>
+    <button class="lb-arrow lb-next" id="lbNext" aria-label="下一张">
+      <svg viewBox="0 0 24 24">
+        <path d="M9 4l8 8-8 8" />
+      </svg>
+    </button>
+    <span class="lb-no" id="lbNo"></span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
