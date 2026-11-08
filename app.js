@@ -1,8 +1,10 @@
 /* ============================================================
    留白 · 图集
    换图 / 加分类：只改下面的 CATS 和 PHOTOS 两个数组。
-   src 指向 images/ 里的本地文件，w / h 是图片原始像素宽高
-   （用来占位，避免加载时跳动），cat 对应分类的 id。
+   src 指向 images/ 里的本地文件，w / h 必须是图片【真实】像素宽高
+   —— 填错了占位比例就错，图加载完页面会跳一下。
+   加完图片跑一次：python tools/optimize-images.py
+   它会生成 images/w/ 下的多尺寸 WebP，页面按屏幕自动挑最合适的一档。
    ============================================================ */
 
 const CATS = [
@@ -14,28 +16,54 @@ const CATS = [
 ];
 
 const PHOTOS = [
-  { src: 'images/01.jpg', w: 1200, h: 1500, cat: 'R18' },
-  { src: 'images/02.jpg', w: 1400, h: 933, cat: 'R18' },
-  { src: 'images/03.jpg', w: 1200, h: 1200, cat: 'R18' },
-  { src: 'images/04.jpg', w: 1200, h: 1600, cat: 'R18' },
-  { src: 'images/05.jpg', w: 1200, h: 1500, cat: 'foot' },
-  { src: 'images/06.jpg', w: 1400, h: 933, cat: 'foot' },
-  { src: 'images/07.jpg', w: 1200, h: 1600, cat: 'foot' },
-  { src: 'images/08.jpg', w: 1200, h: 1200, cat: 'big' },
-  { src: 'images/09.jpg', w: 1400, h: 933, cat: 'big' },
-  { src: 'images/10.jpg', w: 1200, h: 1500, cat: 'big' },
-  { src: 'images/11.jpg', w: 1200, h: 1200, cat: 'big' },
-  { src: 'images/12.jpg', w: 1400, h: 933, cat: 'big' },
-  { src: 'images/13.jpg', w: 1200, h: 1500, cat: 'small' },
-  { src: 'images/14.jpg', w: 1200, h: 1200, cat: 'small' },
-  { src: 'images/15.jpg', w: 1200, h: 1500, cat: 'beauty' },
-  { src: 'images/16.jpg', w: 1400, h: 933, cat: 'beauty' },
-  { src: 'images/17.jpg', w: 1200, h: 1500, cat: 'beauty' },
-  { src: 'images/18.jpg', w: 1400, h: 933, cat: 'beauty' },
-  { src: 'images/19.jpg', w: 1200, h: 1500, cat: 'beauty' },
-  { src: 'images/20.jpg', w: 1400, h: 933, cat: 'beauty' }
-
+  { src: 'images/01.jpg', w: 2434, h: 1303, cat: 'R18' },
+  { src: 'images/02.jpg', w: 1003, h: 1416, cat: 'R18' },
+  { src: 'images/03.jpg', w: 1500, h: 2000, cat: 'R18' },
+  { src: 'images/04.jpg', w: 1479, h: 2560, cat: 'R18' },
+  { src: 'images/05.jpg', w: 894, h: 1340, cat: 'foot' },
+  { src: 'images/06.jpg', w: 376, h: 685, cat: 'foot' },
+  { src: 'images/07.jpg', w: 754, h: 1200, cat: 'foot' },
+  { src: 'images/08.jpg', w: 1964, h: 2560, cat: 'big' },
+  { src: 'images/09.jpg', w: 1330, h: 1330, cat: 'big' },
+  { src: 'images/10.jpg', w: 1200, h: 1779, cat: 'big' },
+  { src: 'images/11.jpg', w: 943, h: 1528, cat: 'big' },
+  { src: 'images/12.jpg', w: 743, h: 1051, cat: 'big' },
+  { src: 'images/13.jpg', w: 1637, h: 2560, cat: 'small' },
+  { src: 'images/14.jpg', w: 1756, h: 2479, cat: 'small' },
+  { src: 'images/15.jpg', w: 959, h: 1354, cat: 'beauty' },
+  { src: 'images/16.jpg', w: 1165, h: 1631, cat: 'beauty' },
+  { src: 'images/17.jpg', w: 892, h: 1220, cat: 'beauty' },
+  { src: 'images/18.jpg', w: 1811, h: 2560, cat: 'beauty' },
+  { src: 'images/19.jpg', w: 1082, h: 1288, cat: 'beauty' },
+  { src: 'images/20.jpg', w: 799, h: 882, cat: 'beauty' }
 ];
+
+/* ---------------- 多尺寸 WebP ----------------
+   档位必须和 tools/optimize-images.py 里的 LADDER 一致：
+   只有「档位 <= 原图宽度」的那些文件才是真实存在的。            */
+
+const LADDER = [480, 800, 1200, 1600];
+
+const widthsFor = p => LADDER.filter(w => w <= p.w);
+
+const webpPath = (p, w) =>
+  `images/w/${p.src.split('/').pop().replace(/\.[^.]+$/, '')}-${w}.webp`;
+
+const srcsetOf = p => widthsFor(p).map(w => `${webpPath(p, w)} ${w}w`).join(', ');
+
+/* 图墙里一格大概占多宽。和 styles.css 的断点、留白对齐：
+   <=620 一列 / <=1080 两列 / 其余三列                              */
+const SIZES_GRID =
+  '(max-width:620px) calc(100vw - 40px), ' +
+  '(max-width:1080px) calc((100vw - 76px) / 2), ' +
+  'calc((100vw - 132px) / 3)';
+
+const SIZES_LB = '(max-width:620px) calc(100vw - 20px), calc(100vw - 220px)';
+
+const webpSource = p => {
+  const set = srcsetOf(p);
+  return set ? `<source type="image/webp" srcset="${set}" sizes="${SIZES_GRID}">` : '';
+};
 
 /* ---------------- 元素 ---------------- */
 
@@ -153,8 +181,12 @@ function openCat(id) {
     <button class="shot" type="button" data-i="${i}"
             style="animation-delay:${Math.min(i * 35, 420)}ms"
             aria-label="第 ${i + 1} 张，共 ${current.length} 张">
-      <img src="${p.src}" width="${p.w}" height="${p.h}" alt=""
-           loading="${i < 4 ? 'eager' : 'lazy'}" decoding="async">
+      <picture>
+        ${webpSource(p)}
+        <img src="${p.src}" width="${p.w}" height="${p.h}" alt=""
+             loading="${i < 2 ? 'eager' : 'lazy'}" decoding="async"${
+               i === 0 ? ' fetchpriority="high"' : ''}>
+      </picture>
     </button>`).join('');
 
   masonry();
@@ -179,10 +211,34 @@ function goHome() {
 
 /* ---------------- 灯箱 ---------------- */
 
+/* 预加载左右各一张，滑动时不用等 */
+const warmed = new Set();
+
+function warmNeighbors() {
+  if (current.length < 2) return;
+  [1, -1].forEach(d => {
+    const p = current[(cursor + d + current.length) % current.length];
+    if (warmed.has(p.src)) return;
+    warmed.add(p.src);
+    const im = new Image();
+    const set = srcsetOf(p);
+    if (set) { im.srcset = set; im.sizes = SIZES_LB; }
+    im.src = p.src;
+  });
+}
+
 function paint() {
   const p = current[cursor];
+  const set = srcsetOf(p);
+  if (set) {
+    lbImg.srcset = set;
+    lbImg.sizes = SIZES_LB;
+  } else {
+    lbImg.removeAttribute('srcset');
+  }
   lbImg.src = p.src;
   lbNo.textContent = `${String(cursor + 1).padStart(2, '0')} / ${String(current.length).padStart(2, '0')}`;
+  warmNeighbors();
 }
 
 function openLB(i) {
@@ -199,6 +255,8 @@ function closeLB() {
   lb.classList.remove('open');
   document.body.classList.remove('lb-open');
   lbImg.removeAttribute('src');
+  lbImg.removeAttribute('srcset');
+  lbImg.removeAttribute('sizes');
 }
 
 function step(dir) {

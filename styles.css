@@ -182,6 +182,8 @@ body.is-gallery .back{display:block}
   to{opacity:1;transform:none}
 }
 
+.shot picture{display:block}
+
 .shot img{
   display:block;
   width:100%;height:auto;

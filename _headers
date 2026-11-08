@@ -1,0 +1,27 @@
+# ============================================================
+# Netlify 缓存策略
+# _headers 放在发布目录根下，Git 部署和拖拽部署都会生效。
+#
+# 为什么要这个文件：Netlify 对静态文件的默认响应头是
+#   cache-control: public, max-age=0, must-revalidate
+# 也就是"每次访问都要回源校验一遍"。一页 6 张图就是 6 次往返，
+# 手机弱网下这部分开销非常明显。
+# ============================================================
+
+# 图片：一个月内直接用本地缓存，过期后先在后台校验、先把旧图给你看
+/images/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=604800
+
+# 样式 / 脚本：10 分钟内复用缓存，后台静默更新
+/*.css
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400
+
+/*.js
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400
+
+# HTML：每次都回源校验，保证换图后立刻生效
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
