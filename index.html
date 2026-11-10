@@ -95,7 +95,7 @@
     @media (hover:hover){
       .back:hover{color:var(--ink);transform:translateX(-3px)}
     }
-    body.is-gallery .back{display:block}
+    body:not(.is-home) .back{display:block}
 
     /* ---------------- views ---------------- */
 
@@ -148,6 +148,16 @@
       .cat:hover .cat-go{opacity:.55;transform:translateX(4px)}
     }
     .cat:focus-visible .cat-go{opacity:.55;transform:translateX(4px)}
+
+    .cat-meta{
+      display:flex;align-items:center;gap:clamp(8px,1vw,14px);
+    }
+    .cat-note{
+      font-size:11px;letter-spacing:.14em;
+      color:var(--faint);
+      font-variant-numeric:tabular-nums;
+      white-space:nowrap;
+    }
 
     /* 首屏入场 */
     .js .cat{animation:catIn .9s var(--ease) both}
@@ -333,9 +343,16 @@
   </header>
 
   <main>
-    <section class="view is-on" id="viewHome">
+    <section class="view is-on" id="viewDates">
       <div class="wrap">
         <div class="index" id="index"></div>
+      </div>
+    </section>
+
+    <section class="view" id="viewCats">
+      <div class="wrap">
+        <h1 class="cat-title" id="catsTitle">疗愈小屋</h1>
+        <div class="index" id="catIndex"></div>
       </div>
     </section>
 
@@ -366,68 +383,133 @@
   <script>
     /* ============================================================
        疗愈小屋 · 图集
-       换图 / 加分类：只改下面的 CATS 和 PHOTOS 两个数组。
-       src 指向 images/ 里的本地文件，w / h 必须是图片【真实】像素宽高
-       —— 填错了占位比例就错，图加载完页面会跳一下。
-       加完图片跑一次：python tools/optimize-images.py
-       它会生成 images/w/ 下的多尺寸 WebP 和 TINT 主色调表。
+       三级结构：日期 → 分类 → 图墙
+
+       加图：把图片放进 images/<日期>/ 目录里（文件夹名就是首屏的日期），
+            文件名带上分类，比如 meme-12.jpg / beauty-03.jpg，
+            然后在项目根目录运行：python tools/optimize-images.py
+            PHOTOS 和 TINT 会自动写好，不用手填宽高。
+
+       ALBUMS 是手改的：新日期、新分类、显示名都写在它里面。
        ============================================================ */
 
-    const CATS = [
-      { id: 'R18', name: 'R18' },
-      { id: 'foot', name: '脚' },
-      { id: 'big', name: '巨入' },
-      { id: 'small', name: '贫入' },
-      { id: 'beauty', name: '唯美' }
+    /* ---- ALBUMS 开始：手改这里（新日期、分类、显示名） ---- */
+    const ALBUMS = [
+      {
+        id: '2026.11.10',
+        name: '2026.11.10',
+        cats: [
+          { id: 'meme', name: '梗图' },
+          { id: 'nsfw', name: '轻度NSFW' }
+        ]
+      },
+      {
+        id: '2026.11.09',
+        name: '2026.11.09',
+        cats: [
+          { id: 'R18', name: 'R18' },
+          { id: 'foot', name: '脚' },
+          { id: 'big', name: '巨入' },
+          { id: 'small', name: '贫入' },
+          { id: 'beauty', name: '唯美' }
+        ]
+      }
     ];
+    /* ---- ALBUMS 结束 ---- */
 
+    /* ---- PHOTOS 开始：由 tools/optimize-images.py 自动生成，不要手改 ---- */
     const PHOTOS = [
-      { src: 'images/01.jpg', w: 2434, h: 1303, cat: 'R18' },
-      { src: 'images/02.jpg', w: 1003, h: 1416, cat: 'R18' },
-      { src: 'images/03.jpg', w: 1500, h: 2000, cat: 'R18' },
-      { src: 'images/04.jpg', w: 1479, h: 2560, cat: 'R18' },
-      { src: 'images/05.jpg', w: 894, h: 1340, cat: 'foot' },
-      { src: 'images/06.jpg', w: 376, h: 685, cat: 'foot' },
-      { src: 'images/07.jpg', w: 754, h: 1200, cat: 'foot' },
-      { src: 'images/08.jpg', w: 1964, h: 2560, cat: 'big' },
-      { src: 'images/09.jpg', w: 1330, h: 1330, cat: 'big' },
-      { src: 'images/10.jpg', w: 1200, h: 1779, cat: 'big' },
-      { src: 'images/11.jpg', w: 943, h: 1528, cat: 'big' },
-      { src: 'images/12.jpg', w: 743, h: 1051, cat: 'big' },
-      { src: 'images/13.jpg', w: 1637, h: 2560, cat: 'small' },
-      { src: 'images/14.jpg', w: 1756, h: 2479, cat: 'small' },
-      { src: 'images/15.jpg', w: 959, h: 1354, cat: 'beauty' },
-      { src: 'images/16.jpg', w: 1165, h: 1631, cat: 'beauty' },
-      { src: 'images/17.jpg', w: 892, h: 1220, cat: 'beauty' },
-      { src: 'images/18.jpg', w: 1811, h: 2560, cat: 'beauty' },
-      { src: 'images/19.jpg', w: 1082, h: 1288, cat: 'beauty' },
-      { src: 'images/20.jpg', w: 799, h: 882, cat: 'beauty' }
+      { src: 'images/2026.11.10/meme-01.jpg', w: 690, h: 1186, a: '2026.11.10', cat: 'meme' },
+      { src: 'images/2026.11.10/meme-02.jpg', w: 1080, h: 653, a: '2026.11.10', cat: 'meme' },
+      { src: 'images/2026.11.10/meme-03.jpg', w: 690, h: 835, a: '2026.11.10', cat: 'meme' },
+      { src: 'images/2026.11.10/meme-04.jpg', w: 1190, h: 717, a: '2026.11.10', cat: 'meme' },
+      { src: 'images/2026.11.10/meme-05.jpg', w: 599, h: 756, a: '2026.11.10', cat: 'meme' },
+      { src: 'images/2026.11.10/meme-06.jpg', w: 996, h: 1009, a: '2026.11.10', cat: 'meme' },
+      { src: 'images/2026.11.10/meme-07.jpg', w: 1280, h: 1418, a: '2026.11.10', cat: 'meme' },
+      { src: 'images/2026.11.10/meme-08.jpg', w: 1080, h: 1145, a: '2026.11.10', cat: 'meme' },
+      { src: 'images/2026.11.10/meme-09.jpg', w: 600, h: 600, a: '2026.11.10', cat: 'meme' },
+      { src: 'images/2026.11.10/meme-10.jpg', w: 960, h: 1074, a: '2026.11.10', cat: 'meme' },
+      { src: 'images/2026.11.10/meme-11.jpg', w: 1080, h: 1550, a: '2026.11.10', cat: 'meme' },
+      { src: 'images/2026.11.10/nsfw-01.jpg', w: 1185, h: 1842, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-02.jpg', w: 2494, h: 4093, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-03.jpg', w: 1257, h: 1842, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-04.jpg', w: 1109, h: 1954, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-05.jpg', w: 1032, h: 1842, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-06.jpg', w: 1077, h: 1842, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-07.jpg', w: 1010, h: 1842, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-08.jpg', w: 1032, h: 1842, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-09.jpg', w: 1098, h: 1617, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-10.jpg', w: 1176, h: 1842, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-11.jpg', w: 936, h: 1579, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.09/01.jpg', w: 2434, h: 1303, a: '2026.11.09', cat: 'R18' },
+      { src: 'images/2026.11.09/02.jpg', w: 1003, h: 1416, a: '2026.11.09', cat: 'R18' },
+      { src: 'images/2026.11.09/03.jpg', w: 1500, h: 2000, a: '2026.11.09', cat: 'R18' },
+      { src: 'images/2026.11.09/04.jpg', w: 1479, h: 2560, a: '2026.11.09', cat: 'R18' },
+      { src: 'images/2026.11.09/05.jpg', w: 894, h: 1340, a: '2026.11.09', cat: 'foot' },
+      { src: 'images/2026.11.09/06.jpg', w: 376, h: 685, a: '2026.11.09', cat: 'foot' },
+      { src: 'images/2026.11.09/07.jpg', w: 754, h: 1200, a: '2026.11.09', cat: 'foot' },
+      { src: 'images/2026.11.09/08.jpg', w: 1964, h: 2560, a: '2026.11.09', cat: 'big' },
+      { src: 'images/2026.11.09/09.jpg', w: 1330, h: 1330, a: '2026.11.09', cat: 'big' },
+      { src: 'images/2026.11.09/10.jpg', w: 1200, h: 1779, a: '2026.11.09', cat: 'big' },
+      { src: 'images/2026.11.09/11.jpg', w: 943, h: 1528, a: '2026.11.09', cat: 'big' },
+      { src: 'images/2026.11.09/12.jpg', w: 743, h: 1051, a: '2026.11.09', cat: 'big' },
+      { src: 'images/2026.11.09/13.jpg', w: 1637, h: 2560, a: '2026.11.09', cat: 'small' },
+      { src: 'images/2026.11.09/14.jpg', w: 1756, h: 2479, a: '2026.11.09', cat: 'small' },
+      { src: 'images/2026.11.09/15.jpg', w: 959, h: 1354, a: '2026.11.09', cat: 'beauty' },
+      { src: 'images/2026.11.09/16.jpg', w: 1165, h: 1631, a: '2026.11.09', cat: 'beauty' },
+      { src: 'images/2026.11.09/17.jpg', w: 892, h: 1220, a: '2026.11.09', cat: 'beauty' },
+      { src: 'images/2026.11.09/18.jpg', w: 1811, h: 2560, a: '2026.11.09', cat: 'beauty' },
+      { src: 'images/2026.11.09/19.jpg', w: 1082, h: 1288, a: '2026.11.09', cat: 'beauty' },
+      { src: 'images/2026.11.09/20.jpg', w: 799, h: 882, a: '2026.11.09', cat: 'beauty' }
     ];
+    /* ---- PHOTOS 结束 ---- */
 
-    /* 每张图的主色调，由 tools/optimize-images.py 生成后贴到这里。
-       作用：图还在路上时先铺这层颜色，不是一块死灰。 */
+    /* ---- TINT 开始：同上 ---- */
     const TINT = {
-      '01': '#b79299',
-      '02': '#bcaaae',
-      '03': '#aa969c',
-      '04': '#e0d4da',
-      '05': '#a79bad',
-      '06': '#878087',
-      '07': '#cac3c5',
-      '08': '#f0bdbc',
-      '09': '#c3aeb2',
-      '10': '#ded2d9',
-      '11': '#e6b9bc',
-      '12': '#9d8071',
-      '13': '#dfc8c6',
-      '14': '#d5c9c6',
-      '15': '#88969d',
-      '16': '#4f6168',
-      '17': '#b09aba',
-      '18': '#d7d6df',
-      '19': '#d9ced4',
-      '20': '#e4d6dc'
+      '2026.11.10/meme-01': '#cfbdc2',
+      '2026.11.10/meme-02': '#ebebeb',
+      '2026.11.10/meme-03': '#a38a5e',
+      '2026.11.10/meme-04': '#4e363f',
+      '2026.11.10/meme-05': '#717e90',
+      '2026.11.10/meme-06': '#8d8683',
+      '2026.11.10/meme-07': '#eeedf2',
+      '2026.11.10/meme-08': '#7f7e76',
+      '2026.11.10/meme-09': '#908e99',
+      '2026.11.10/meme-10': '#5d5147',
+      '2026.11.10/meme-11': '#c9d0c6',
+      '2026.11.10/nsfw-01': '#bab3c1',
+      '2026.11.10/nsfw-02': '#bdc2c8',
+      '2026.11.10/nsfw-03': '#a0999e',
+      '2026.11.10/nsfw-04': '#dcd5da',
+      '2026.11.10/nsfw-05': '#c1b7c0',
+      '2026.11.10/nsfw-06': '#75757b',
+      '2026.11.10/nsfw-07': '#d4d3da',
+      '2026.11.10/nsfw-08': '#d4ced5',
+      '2026.11.10/nsfw-09': '#b9b0b7',
+      '2026.11.10/nsfw-10': '#bbb1b7',
+      '2026.11.10/nsfw-11': '#958b92',
+      '2026.11.09/01': '#b79299',
+      '2026.11.09/02': '#bcaaae',
+      '2026.11.09/03': '#aa969c',
+      '2026.11.09/04': '#e0d4da',
+      '2026.11.09/05': '#a79bad',
+      '2026.11.09/06': '#878087',
+      '2026.11.09/07': '#cac3c5',
+      '2026.11.09/08': '#f0bdbc',
+      '2026.11.09/09': '#c3aeb2',
+      '2026.11.09/10': '#ded2d9',
+      '2026.11.09/11': '#e6b9bc',
+      '2026.11.09/12': '#9d8071',
+      '2026.11.09/13': '#dfc8c6',
+      '2026.11.09/14': '#d5c9c6',
+      '2026.11.09/15': '#88969d',
+      '2026.11.09/16': '#4f6168',
+      '2026.11.09/17': '#b09aba',
+      '2026.11.09/18': '#d7d6df',
+      '2026.11.09/19': '#d9ced4',
+      '2026.11.09/20': '#e4d6dc'
     };
+    /* ---- TINT 结束 ---- */
 
     /* ---------------- 多尺寸 WebP ----------------
        档位必须和 tools/optimize-images.py 里的 LADDER 一致：
@@ -439,7 +521,14 @@
 
     const stemOf = p => p.src.split('/').pop().replace(/\.[^.]+$/, '');
 
-    const webpPath = (p, w) => `images/w/${stemOf(p)}-${w}.webp`;
+    const tintKey = p => `${p.a}/${stemOf(p)}`;
+
+    /* 变体放在每个日期目录下的 w/ 里：
+       images/2026.11.10/meme-01.jpg -> images/2026.11.10/w/meme-01-640.webp */
+    const webpPath = (p, w) => {
+      const dir = p.src.slice(0, p.src.lastIndexOf('/'));
+      return `${dir}/w/${stemOf(p)}-${w}.webp`;
+    };
 
     const srcsetOf = p => widthsFor(p).map(w => `${webpPath(p, w)} ${w}w`).join(', ');
 
@@ -455,9 +544,13 @@
     /* ---------------- 元素 ---------------- */
 
     const indexEl = document.getElementById('index');
+    const catIndexEl = document.getElementById('catIndex');
+    const catsTitleEl = document.getElementById('catsTitle');
+    const backEl = document.getElementById('back');
     const galleryEl = document.getElementById('gallery');
     const titleEl = document.getElementById('catTitle');
-    const viewHome = document.getElementById('viewHome');
+    const viewDates = document.getElementById('viewDates');
+    const viewCats = document.getElementById('viewCats');
     const viewGalb = document.getElementById('viewGallery');
 
     const lb = document.getElementById('lb');
@@ -470,14 +563,47 @@
     let current = [];   // 当前分类的照片
     let cursor = 0;
 
-    /* ---------------- 首屏 ---------------- */
+    /* ---------------- 首屏：日期 ---------------- */
 
-    function renderIndex() {
-      indexEl.innerHTML = CATS.map(c => `
-    <a class="cat" href="#/${c.id}">
-      <span class="cat-name">${c.name}</span>
-      <span class="cat-go" aria-hidden="true">→</span>
-    </a>`).join('');
+    const albumOf = id => ALBUMS.find(a => a.id === id);
+
+    const countIn = (albumId, catId) =>
+      PHOTOS.filter(p => p.a === albumId && (!catId || p.cat === catId)).length;
+
+    const row = (href, name, note) => `
+    <a class="cat" href="${href}">
+      <span class="cat-name">${name}</span>
+      <span class="cat-meta">
+        <span class="cat-note">${note}</span>
+        <span class="cat-go" aria-hidden="true">→</span>
+      </span>
+    </a>`;
+
+    function renderDates() {
+      indexEl.innerHTML = ALBUMS
+        .map(a => row(`#/${a.id}`, a.name, `${countIn(a.id)} 张`))
+        .join('');
+    }
+
+    function renderCats(album) {
+      catsTitleEl.textContent = album.name;
+      catIndexEl.innerHTML = album.cats
+        .map(c => row(`#/${album.id}/${c.id}`, c.name, `${countIn(album.id, c.id)} 张`))
+        .join('');
+    }
+
+    function show(which) {
+      viewDates.classList.toggle('is-on', which === 'dates');
+      viewCats.classList.toggle('is-on', which === 'cats');
+      viewGalb.classList.toggle('is-on', which === 'gallery');
+      document.body.classList.toggle('is-home', which === 'dates');
+      document.body.classList.toggle('is-gallery', which === 'gallery');
+      window.scrollTo(0, 0);
+    }
+
+    function setBack(href, text) {
+      backEl.setAttribute('href', href);
+      backEl.textContent = text;
     }
 
     /* ---------------- 图墙 ---------------- */
@@ -650,7 +776,7 @@
 
     function shotHTML(p, i, total) {
       const first = i === 0;
-      const tint = TINT[stemOf(p)] || '#eae5dc';
+      const tint = TINT[tintKey(p)] || '#eae5dc';
 
       return `
     <button class="shot" type="button" data-i="${i}"
@@ -665,13 +791,24 @@
     </button>`;
     }
 
-    function openCat(id) {
-      const cat = CATS.find(c => c.id === id);
-      if (!cat) return goHome();
+    function openAlbum(id) {
+      const album = albumOf(id);
+      if (!album) return goDates();
 
       closeLB();
-      current = PHOTOS.filter(p => p.cat === id);
-      titleEl.textContent = cat.name;
+      renderCats(album);
+      show('cats');
+      setBack('#/', '← 全部日期');
+    }
+
+    function openCat(albumId, catId) {
+      const album = albumOf(albumId);
+      const cat = album && album.cats.find(c => c.id === catId);
+      if (!cat) return goDates();
+
+      closeLB();
+      current = PHOTOS.filter(p => p.a === albumId && p.cat === catId);
+      titleEl.textContent = `${album.name} · ${cat.name}`;
 
       galleryEl.innerHTML = current.map((p, i) => shotHTML(p, i, current.length)).join('');
 
@@ -684,21 +821,14 @@
         else enqueue(shot);
       });
 
-      document.body.classList.remove('is-home');
-      document.body.classList.add('is-gallery');
-      viewHome.classList.remove('is-on');
-      viewGalb.classList.add('is-on');
-      window.scrollTo(0, 0);
+      show('gallery');
+      setBack(`#/${album.id}`, `← ${album.name}`);
     }
 
-    function goHome() {
+    function goDates() {
       closeLB();
-      renderIndex();
-      document.body.classList.remove('is-gallery');
-      document.body.classList.add('is-home');
-      viewGalb.classList.remove('is-on');
-      viewHome.classList.add('is-on');
-      window.scrollTo(0, 0);
+      renderDates();
+      show('dates');
     }
 
     /* ---------------- 灯箱 ---------------- */
@@ -793,9 +923,10 @@
     /* ---------------- 路由 ---------------- */
 
     function route() {
-      const id = (location.hash || '').replace(/^#\/?/, '');
-      if (id) openCat(id);
-      else goHome();
+      const seg = (location.hash || '').replace(/^#\/?/, '').split('/').filter(Boolean);
+      if (seg.length >= 2) return openCat(seg[0], seg[1]);
+      if (seg.length === 1) return openAlbum(seg[0]);
+      goDates();
     }
 
     window.addEventListener('hashchange', route);
