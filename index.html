@@ -396,6 +396,14 @@
     /* ---- ALBUMS 开始：手改这里（新日期、分类、显示名） ---- */
     const ALBUMS = [
       {
+        id: '2026.11.14',
+        name: '2026.11.14',
+        cats: [
+          { id: 'meme', name: '梗图' },
+          { id: 'heal', name: '治愈' }
+        ]
+      },
+      {
         id: '2026.11.10',
         name: '2026.11.10',
         cats: [
@@ -419,6 +427,36 @@
 
     /* ---- PHOTOS 开始：由 tools/optimize-images.py 自动生成，不要手改 ---- */
     const PHOTOS = [
+      { src: 'images/2026.11.14/heal-01.jpg', w: 1201, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-02.jpg', w: 1000, h: 1403, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-03.jpg', w: 1131, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-04.jpg', w: 1200, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-05.jpg', w: 1200, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-06.jpg', w: 1225, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-07.jpg', w: 1355, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-08.jpg', w: 850, h: 1208, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-09.jpg', w: 1132, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-10.jpg', w: 1000, h: 1414, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-11.jpg', w: 1095, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-12.jpg', w: 1131, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-13.jpg', w: 1132, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-14.jpg', w: 1129, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-15.jpg', w: 1067, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/heal-16.jpg', w: 1131, h: 1600, a: '2026.11.14', cat: 'heal' },
+      { src: 'images/2026.11.14/meme-01.jpg', w: 896, h: 1000, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-02.jpg', w: 866, h: 1000, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-03.jpg', w: 602, h: 1000, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-04.jpg', w: 544, h: 680, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-05.jpg', w: 560, h: 800, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-06.jpg', w: 690, h: 496, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-07.jpg', w: 690, h: 300, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-08.jpg', w: 690, h: 926, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-09.jpg', w: 898, h: 1280, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-10.jpg', w: 680, h: 312, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-11.jpg', w: 1440, h: 1492, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-12.jpg', w: 1440, h: 722, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-13.jpg', w: 1280, h: 1594, a: '2026.11.14', cat: 'meme' },
+      { src: 'images/2026.11.14/meme-14.jpg', w: 680, h: 476, a: '2026.11.14', cat: 'meme' },
       { src: 'images/2026.11.10/meme-01.jpg', w: 690, h: 1186, a: '2026.11.10', cat: 'meme' },
       { src: 'images/2026.11.10/meme-02.jpg', w: 1080, h: 653, a: '2026.11.10', cat: 'meme' },
       { src: 'images/2026.11.10/meme-03.jpg', w: 690, h: 835, a: '2026.11.10', cat: 'meme' },
@@ -430,35 +468,35 @@
       { src: 'images/2026.11.10/meme-09.jpg', w: 600, h: 600, a: '2026.11.10', cat: 'meme' },
       { src: 'images/2026.11.10/meme-10.jpg', w: 960, h: 1074, a: '2026.11.10', cat: 'meme' },
       { src: 'images/2026.11.10/meme-11.jpg', w: 1080, h: 1550, a: '2026.11.10', cat: 'meme' },
-      { src: 'images/2026.11.10/nsfw-01.jpg', w: 1185, h: 1842, a: '2026.11.10', cat: 'nsfw' },
-      { src: 'images/2026.11.10/nsfw-02.jpg', w: 2494, h: 4093, a: '2026.11.10', cat: 'nsfw' },
-      { src: 'images/2026.11.10/nsfw-03.jpg', w: 1257, h: 1842, a: '2026.11.10', cat: 'nsfw' },
-      { src: 'images/2026.11.10/nsfw-04.jpg', w: 1109, h: 1954, a: '2026.11.10', cat: 'nsfw' },
-      { src: 'images/2026.11.10/nsfw-05.jpg', w: 1032, h: 1842, a: '2026.11.10', cat: 'nsfw' },
-      { src: 'images/2026.11.10/nsfw-06.jpg', w: 1077, h: 1842, a: '2026.11.10', cat: 'nsfw' },
-      { src: 'images/2026.11.10/nsfw-07.jpg', w: 1010, h: 1842, a: '2026.11.10', cat: 'nsfw' },
-      { src: 'images/2026.11.10/nsfw-08.jpg', w: 1032, h: 1842, a: '2026.11.10', cat: 'nsfw' },
-      { src: 'images/2026.11.10/nsfw-09.jpg', w: 1098, h: 1617, a: '2026.11.10', cat: 'nsfw' },
-      { src: 'images/2026.11.10/nsfw-10.jpg', w: 1176, h: 1842, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-01.jpg', w: 1029, h: 1600, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-02.jpg', w: 975, h: 1600, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-03.jpg', w: 1092, h: 1600, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-04.jpg', w: 908, h: 1600, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-05.jpg', w: 896, h: 1600, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-06.jpg', w: 936, h: 1600, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-07.jpg', w: 877, h: 1600, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-08.jpg', w: 896, h: 1600, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-09.jpg', w: 1086, h: 1600, a: '2026.11.10', cat: 'nsfw' },
+      { src: 'images/2026.11.10/nsfw-10.jpg', w: 1021, h: 1600, a: '2026.11.10', cat: 'nsfw' },
       { src: 'images/2026.11.10/nsfw-11.jpg', w: 936, h: 1579, a: '2026.11.10', cat: 'nsfw' },
-      { src: 'images/2026.11.09/01.jpg', w: 2434, h: 1303, a: '2026.11.09', cat: 'R18' },
+      { src: 'images/2026.11.09/01.jpg', w: 1600, h: 857, a: '2026.11.09', cat: 'R18' },
       { src: 'images/2026.11.09/02.jpg', w: 1003, h: 1416, a: '2026.11.09', cat: 'R18' },
-      { src: 'images/2026.11.09/03.jpg', w: 1500, h: 2000, a: '2026.11.09', cat: 'R18' },
-      { src: 'images/2026.11.09/04.jpg', w: 1479, h: 2560, a: '2026.11.09', cat: 'R18' },
+      { src: 'images/2026.11.09/03.jpg', w: 1200, h: 1600, a: '2026.11.09', cat: 'R18' },
+      { src: 'images/2026.11.09/04.jpg', w: 924, h: 1600, a: '2026.11.09', cat: 'R18' },
       { src: 'images/2026.11.09/05.jpg', w: 894, h: 1340, a: '2026.11.09', cat: 'foot' },
       { src: 'images/2026.11.09/06.jpg', w: 376, h: 685, a: '2026.11.09', cat: 'foot' },
       { src: 'images/2026.11.09/07.jpg', w: 754, h: 1200, a: '2026.11.09', cat: 'foot' },
-      { src: 'images/2026.11.09/08.jpg', w: 1964, h: 2560, a: '2026.11.09', cat: 'big' },
+      { src: 'images/2026.11.09/08.jpg', w: 1228, h: 1600, a: '2026.11.09', cat: 'big' },
       { src: 'images/2026.11.09/09.jpg', w: 1330, h: 1330, a: '2026.11.09', cat: 'big' },
-      { src: 'images/2026.11.09/10.jpg', w: 1200, h: 1779, a: '2026.11.09', cat: 'big' },
+      { src: 'images/2026.11.09/10.jpg', w: 1079, h: 1600, a: '2026.11.09', cat: 'big' },
       { src: 'images/2026.11.09/11.jpg', w: 943, h: 1528, a: '2026.11.09', cat: 'big' },
       { src: 'images/2026.11.09/12.jpg', w: 743, h: 1051, a: '2026.11.09', cat: 'big' },
-      { src: 'images/2026.11.09/13.jpg', w: 1637, h: 2560, a: '2026.11.09', cat: 'small' },
-      { src: 'images/2026.11.09/14.jpg', w: 1756, h: 2479, a: '2026.11.09', cat: 'small' },
+      { src: 'images/2026.11.09/13.jpg', w: 1023, h: 1600, a: '2026.11.09', cat: 'small' },
+      { src: 'images/2026.11.09/14.jpg', w: 1133, h: 1600, a: '2026.11.09', cat: 'small' },
       { src: 'images/2026.11.09/15.jpg', w: 959, h: 1354, a: '2026.11.09', cat: 'beauty' },
       { src: 'images/2026.11.09/16.jpg', w: 1165, h: 1631, a: '2026.11.09', cat: 'beauty' },
       { src: 'images/2026.11.09/17.jpg', w: 892, h: 1220, a: '2026.11.09', cat: 'beauty' },
-      { src: 'images/2026.11.09/18.jpg', w: 1811, h: 2560, a: '2026.11.09', cat: 'beauty' },
+      { src: 'images/2026.11.09/18.jpg', w: 1132, h: 1600, a: '2026.11.09', cat: 'beauty' },
       { src: 'images/2026.11.09/19.jpg', w: 1082, h: 1288, a: '2026.11.09', cat: 'beauty' },
       { src: 'images/2026.11.09/20.jpg', w: 799, h: 882, a: '2026.11.09', cat: 'beauty' }
     ];
@@ -466,6 +504,36 @@
 
     /* ---- TINT 开始：同上 ---- */
     const TINT = {
+      '2026.11.14/heal-01': '#e1e0e9',
+      '2026.11.14/heal-02': '#82a8b6',
+      '2026.11.14/heal-03': '#d9d9db',
+      '2026.11.14/heal-04': '#dcd3d5',
+      '2026.11.14/heal-05': '#d3c6d7',
+      '2026.11.14/heal-06': '#d2b8c2',
+      '2026.11.14/heal-07': '#dfcacf',
+      '2026.11.14/heal-08': '#dbd5eb',
+      '2026.11.14/heal-09': '#cfbcc8',
+      '2026.11.14/heal-10': '#9f8076',
+      '2026.11.14/heal-11': '#d5d1d0',
+      '2026.11.14/heal-12': '#cebccf',
+      '2026.11.14/heal-13': '#e5dadd',
+      '2026.11.14/heal-14': '#9d849e',
+      '2026.11.14/heal-15': '#9b8a9c',
+      '2026.11.14/heal-16': '#c3cde4',
+      '2026.11.14/meme-01': '#5f5865',
+      '2026.11.14/meme-02': '#f5f5f5',
+      '2026.11.14/meme-03': '#3f3c3e',
+      '2026.11.14/meme-04': '#9b93a1',
+      '2026.11.14/meme-05': '#b1ada3',
+      '2026.11.14/meme-06': '#e7e7e8',
+      '2026.11.14/meme-07': '#252525',
+      '2026.11.14/meme-08': '#949381',
+      '2026.11.14/meme-09': '#d6d3d0',
+      '2026.11.14/meme-10': '#525252',
+      '2026.11.14/meme-11': '#ededee',
+      '2026.11.14/meme-12': '#dfe0dd',
+      '2026.11.14/meme-13': '#939795',
+      '2026.11.14/meme-14': '#1b1d11',
       '2026.11.10/meme-01': '#cfbdc2',
       '2026.11.10/meme-02': '#ebebeb',
       '2026.11.10/meme-03': '#a38a5e',
@@ -480,7 +548,7 @@
       '2026.11.10/nsfw-01': '#bab3c1',
       '2026.11.10/nsfw-02': '#bdc2c8',
       '2026.11.10/nsfw-03': '#a0999e',
-      '2026.11.10/nsfw-04': '#dcd5da',
+      '2026.11.10/nsfw-04': '#dbd5da',
       '2026.11.10/nsfw-05': '#c1b7c0',
       '2026.11.10/nsfw-06': '#75757b',
       '2026.11.10/nsfw-07': '#d4d3da',
@@ -495,7 +563,7 @@
       '2026.11.09/05': '#a79bad',
       '2026.11.09/06': '#878087',
       '2026.11.09/07': '#cac3c5',
-      '2026.11.09/08': '#f0bdbc',
+      '2026.11.09/08': '#efbdbc',
       '2026.11.09/09': '#c3aeb2',
       '2026.11.09/10': '#ded2d9',
       '2026.11.09/11': '#e6b9bc',
@@ -752,9 +820,11 @@
       img.removeAttribute('data-src');
     }
 
-    /* 手机上图墙固定用这一档：屏幕小，再高清也看不出，
-       但字节数能省掉近一半。觉得糊就把 640 改成 800。 */
-    const MOBILE_RUNG = 640;
+    /* 手机上图墙固定用这一档。
+       480 在 390pt 的手机屏上看不出和 640 的差别（对比过截图），
+       但体积从 35KB 降到 26KB —— 在慢网络上省下的就是 1 秒多。
+       觉得糊就改回 640 或 800。 */
+    const MOBILE_RUNG = 480;
 
     function sourcesOf(p, first) {
       const out = [];

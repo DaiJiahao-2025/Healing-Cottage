@@ -7,7 +7,10 @@
 #   2. 在项目根目录运行：  python tools/optimize-images.py
 #   3. git push
 #
-# 脚本会做四件事：
+# 脚本会做五件事：
+#   - 原图长边超过 1600 的，先缩到 1600 再压一遍
+#     （页面最大只用到 1600 档，缩了肉眼无差，仓库能小一半多）
+#     不想动原图就加 --no-slim
 #   - 给每张图生成 480/640/800/1200/1600 五档 WebP（只缩小，绝不放大），
 #     放在 images/<日期>/w/ 下
 #   - 算出每张图的主色调，用作加载前的占位底色
@@ -36,6 +39,10 @@ LADDER = (480, 640, 800, 1200, 1600)
 # 每档质量分开给：小图手机上根本看不出差别，压狠一点；
 # 大图主要给灯箱放大用，留得好一些。
 QUALITY = {480: 60, 640: 62, 800: 66, 1200: 70, 1600: 72}
+
+# 原图瘦身：长边超过这个值就缩小（页面最大只用到 1600 档）
+SLIM_MAX = 1600
+SLIM_QUALITY = 84
 
 ROOT = Path(__file__).resolve().parent.parent
 IMAGES = ROOT / "images"
@@ -87,6 +94,8 @@ def write_block(html: str, start: str, end: str, body: str) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cat", default=None, help="文件名里没带分类时用的默认分类 id")
+    ap.add_argument("--no-slim", dest="slim", action="store_false",
+                    help="不改动原图，只生成 WebP 变体")
     args = ap.parse_args()
 
     html = INDEX.read_text(encoding="utf-8")
@@ -106,6 +115,7 @@ def main() -> int:
     entries, tints = [], []
     total_src = total_out = 0
     added, gone = [], []
+    slimmed, slim_saved = 0, 0
 
     for album in albums:
         folder = IMAGES / album["id"]
@@ -119,23 +129,49 @@ def main() -> int:
         out_dir.mkdir(exist_ok=True)
 
         print(f"【{album['name']}】{len(files)} 张")
+        allowed = {}
         for path in files:
             with Image.open(path) as raw:
                 img = ImageOps.exif_transpose(raw).convert("RGB")
-                w, h = img.size
-                r, g, b = img.resize((1, 1), Image.LANCZOS).getpixel((0, 0))[:3]
-                tints.append((f"{album['id']}/{path.stem}", f"#{r:02x}{g:02x}{b:02x}"))
 
-                targets = [t for t in LADDER if t <= w]
-                size_out = 0
-                for target in targets:
-                    nh = max(1, round(h * target / w))
-                    out = out_dir / f"{path.stem}-{target}.webp"
-                    img.resize((target, nh), Image.LANCZOS).save(
-                        out, "WEBP", quality=QUALITY[target], method=6
-                    )
-                    size_out += out.stat().st_size
+            w, h = img.size
+            slim_note = ""
 
+            # 原图太大就先瘦身，页面最大也只用到 1600 档
+            # 重压后如果没明显变小（原图本来就压得很狠），就还原，绝不把一个文件改大
+            if args.slim and path.suffix.lower() in (".jpg", ".jpeg") and max(w, h) > SLIM_MAX:
+                ow, oh = w, h
+                before = path.stat().st_size
+                orig_bytes = path.read_bytes()
+                scale = SLIM_MAX / max(w, h)
+                nw, nh = max(1, round(w * scale)), max(1, round(h * scale))
+                cand = img.resize((nw, nh), Image.LANCZOS)
+                cand.save(path, "JPEG", quality=SLIM_QUALITY, optimize=True, progressive=True)
+                after = path.stat().st_size
+                if after < before * 0.95:
+                    img = cand
+                    w, h = nw, nh
+                    slimmed += 1
+                    slim_saved += before - after
+                    slim_note = f"\n      原图 {ow}x{oh} {before/1024:.0f}KB -> {nw}x{nh} {after/1024:.0f}KB"
+                else:
+                    path.write_bytes(orig_bytes)
+                    slim_note = f"\n      原图 {w}x{h} {before/1024:.0f}KB 已经很紧凑，保持不动"
+
+            r, g, b = img.resize((1, 1), Image.LANCZOS).getpixel((0, 0))[:3]
+            tints.append((f"{album['id']}/{path.stem}", f"#{r:02x}{g:02x}{b:02x}"))
+
+            targets = [t for t in LADDER if t <= w]
+            size_out = 0
+            for target in targets:
+                nh2 = max(1, round(h * target / w))
+                out = out_dir / f"{path.stem}-{target}.webp"
+                img.resize((target, nh2), Image.LANCZOS).save(
+                    out, "WEBP", quality=QUALITY[target], method=6
+                )
+                size_out += out.stat().st_size
+
+            allowed[path.stem] = set(targets)
             total_src += path.stat().st_size
             total_out += size_out
 
@@ -153,12 +189,15 @@ def main() -> int:
             if src not in existing:
                 added.append((src, cat))
             entries.append((src, w, h, album["id"], cat))
-            print(f"    {path.name:16}{w}x{h}{'':4}{size_out / 1024:7.0f}KB  [{cat}]")
+            print(
+                f"    {path.name:16}{w}x{h}{'':4}{size_out / 1024:7.0f}KB  [{cat}]"
+                + slim_note
+            )
 
-        # 清掉已删除图片的残留
-        keep = {p.stem for p in files}
+        # 清掉已删除图片、以及档位已经不存在的残留
         for webp in out_dir.glob("*.webp"):
-            if webp.stem.rsplit("-", 1)[0] not in keep:
+            stem, _, wpart = webp.stem.rpartition("-")
+            if not wpart.isdigit() or int(wpart) not in allowed.get(stem, set()):
                 webp.unlink()
                 gone.append(webp.name)
         if not any(out_dir.iterdir()):
@@ -173,6 +212,8 @@ def main() -> int:
         f"合计 {len(entries)} 张：原图 {total_src / 1024 / 1024:.2f} MB，"
         f"全部档位 {total_out / 1024 / 1024:.2f} MB"
     )
+    if slimmed:
+        print(f"  原图瘦身 {slimmed} 张，省下 {slim_saved / 1024 / 1024:.1f} MB")
     for src, cat in added:
         print(f"  + 新增 {src} -> {cat}")
     if gone:
