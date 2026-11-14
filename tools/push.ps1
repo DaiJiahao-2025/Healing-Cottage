@@ -137,3 +137,4 @@ for ($i = 1; $i -le $ahead; $i++) {
 }
 
 Log ("done. ahead=" + (git rev-list --count origin/main..HEAD) + " dirty=" + ((Get-Changes).Count))
+exit 0
